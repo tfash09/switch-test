@@ -3,7 +3,7 @@ import AccountCard from "./AccountCard";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import type { AccountCarouselProps } from "@/lib/interfaces";
 
-const AccountCarousel: React.FC<AccountCarouselProps> = ({ accounts }) => {
+const AccountCarousel: React.FC<AccountCarouselProps> = ({ accounts, setSelectedAccounts, selectedAccounts }) => {
   const [startIdx, setStartIdx] = useState(0);
   const maxVisible = 3;
 
@@ -42,8 +42,9 @@ const AccountCarousel: React.FC<AccountCarouselProps> = ({ accounts }) => {
               style={{
                 flex: window.innerWidth < 640 ? "0 0 100%" : "1 1 0",
               }}
+              onClick={() => setSelectedAccounts(acc)}
             >
-              <AccountCard {...acc} />
+              <AccountCard {...acc} isActive={acc.id === selectedAccounts?.id} />
             </div>
           ))}
       </div>

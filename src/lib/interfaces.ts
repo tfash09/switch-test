@@ -1,10 +1,11 @@
 export interface Account {
   id: string;
-  type: "Savings" | "Current" | "Student" | "Fixed Deposit" | "Corporate";
+  type: "Savings" | "Current" | "Loan";
   accountNumber: string;
   balance: number;
   currency: string;
   lastTransactionDate: string;
+  isActive?: boolean; 
 }
 
 export type Transaction = {
@@ -43,5 +44,10 @@ export interface LoginDetails {
 
 export interface AccountCarouselProps {
   accounts: Account[];
+  setSelectedAccounts: (account: Account) => void;
+  selectedAccounts: Account | undefined;
 }
 
+export interface AccountTransactionsProps {
+  selectedAccounts: Account;
+}

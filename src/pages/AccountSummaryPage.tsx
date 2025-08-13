@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Select } from "@/components/custom/Select";
 import type { Account, Option } from "@/lib/interfaces";
 import { mockAccounts } from "@/data/mockData";
+import AccountTransactions from "@/components/custom/AccountTransactions";
 
 const sortOptions = [
   { value: "*", label: "Sort By" },
@@ -15,15 +16,18 @@ const AccountSummaryPage: React.FC = () => {
   const [selectedSort, setSelectedSort] = useState<string>(
     sortOptions[0].value
   );
-  const [accountTypes, setAccountTypes] = useState<Option[]>([{
-    value: "*",
-    label: "All Accounts",
-  }]);
+  const [accountTypes, setAccountTypes] = useState<Option[]>([
+    {
+      value: "*",
+      label: "All Accounts",
+    },
+  ]);
   const [selectedType, setSelectedType] = useState<string>(
     accountTypes[0].value
   );
   const [balance, setBalance] = useState<number>(0);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState<Account | undefined>();
   const [filteredAccounts, setFilteredAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -40,27 +44,26 @@ const AccountSummaryPage: React.FC = () => {
         0
       );
       setBalance(totalBalance);
-    if (userAccounts.length > 0) {
-      const uniqueTypes = Array.from(
-        new Set(userAccounts.map((acc) => acc.type))
-      ).map((type) => ({
-        value: type,
-        label: `${type} Account`,
-      }));
-      setAccountTypes([
-        { value: "*", label: "All Accounts" },
-        ...uniqueTypes,
-      ]);
-    }
-
-
+      if (userAccounts.length > 0) {
+        const uniqueTypes = Array.from(
+          new Set(userAccounts.map((acc) => acc.type))
+        ).map((type) => ({
+          value: type,
+          label: `${type} Account`,
+        }));
+        setAccountTypes([
+          { value: "*", label: "All Accounts" },
+          ...uniqueTypes,
+        ]);
+      }
     }, 2000);
   }, []);
 
   React.useEffect(() => {
-    let filtered = selectedType === "*" 
-      ? accounts 
-      : accounts.filter((acc) => acc.type === selectedType);
+    let filtered =
+      selectedType === "*"
+        ? accounts
+        : accounts.filter((acc) => acc.type === selectedType);
 
     if (selectedSort === "balance") {
       filtered = [...filtered].sort((a, b) => b.balance - a.balance);
@@ -71,7 +74,7 @@ const AccountSummaryPage: React.FC = () => {
           new Date(a.lastTransactionDate).getTime()
       );
     }
-
+    setSelectedAccounts(undefined)
     setFilteredAccounts(filtered);
   }, [accounts, selectedType, selectedSort]);
 
@@ -112,7 +115,17 @@ const AccountSummaryPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <AccountCarousel accounts={filteredAccounts} />
+          <AccountCarousel
+            accounts={filteredAccounts}
+            selectedAccounts={selectedAccounts}
+            setSelectedAccounts={setSelectedAccounts}
+          />
+
+          {selectedAccounts && (
+            <AccountTransactions
+              selectedAccounts={selectedAccounts}
+            />
+          )}
         </div>
       )}
     </div>

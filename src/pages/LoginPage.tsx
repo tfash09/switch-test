@@ -10,11 +10,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import type { loginFormData } from "@/lib/formData";
 import { showToast } from "@/lib/toast";
 import { useAppSelector } from "@/store/store";
-
-interface LoginDetails {
-  email: string;
-  password: string;
-}
+import { dummyUser } from "@/data/mockData";
+import type { LoginDetails } from "@/lib/interfaces";
 
 const LoginPage: React.FC = () => {
   const [loader, setLoader] = useState(false);
@@ -50,16 +47,7 @@ const LoginPage: React.FC = () => {
         data.email === "test@interswitch.com" &&
         data.password === "Pass@123"
       ) {
-        const dummyUser = {
-          id: 1,
-          name: "Test User",
-          email: data.email,
-          token: "dummy-token-123",
-          phoneNumber: "1234567890",
-          firstName: "Test",
-          middleName: "User",
-          lastName: "Example",
-        };
+        showToast("Login Successful", "success");
         dispatch(loginSuccess(dummyUser));
       } else {
         showToast("Login credentials failed", "error");

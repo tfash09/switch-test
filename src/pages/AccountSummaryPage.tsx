@@ -3,8 +3,9 @@ import AccountCarousel from "@/components/custom/AccountCarousel";
 import { formatCurrency } from "@/lib/utils";
 import { Select } from "@/components/custom/Select";
 import type { Account, Option } from "@/lib/interfaces";
-import { mockAccounts } from "@/data/mockData";
 import AccountTransactions from "@/components/custom/AccountTransactions";
+import { useAccount } from "@/hooks/useAccount";
+import { showToast } from "@/lib/toast";
 
 const sortOptions = [
   { value: "*", label: "Sort By" },
@@ -27,37 +28,51 @@ const AccountSummaryPage: React.FC = () => {
   );
   const [balance, setBalance] = useState<number>(0);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [selectedAccounts, setSelectedAccounts] = useState<Account | undefined>();
+  const [selectedAccounts, setSelectedAccounts] = useState<
+    Account | undefined
+  >();
   const [filteredAccounts, setFilteredAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(false);
+  const { getAccounts } = useAccount();
 
   React.useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      const userAccounts = mockAccounts;
-      setAccounts(userAccounts);
-      setFilteredAccounts(userAccounts);
-      const totalBalance = userAccounts.reduce(
-        (acc, curr) => acc + curr.balance,
-        0
-      );
-      setBalance(totalBalance);
-      if (userAccounts.length > 0) {
-        const uniqueTypes = Array.from(
-          new Set(userAccounts.map((acc) => acc.type))
-        ).map((type) => ({
-          value: type,
-          label: `${type} Account`,
-        }));
-        setAccountTypes([
-          { value: "*", label: "All Accounts" },
-          ...uniqueTypes,
-        ]);
-      }
-    }, 2000);
+    handleFetchAccounts();
   }, []);
+
+  const handleFetchAccounts = async () => {
+    setLoading(true);
+    try {
+      const response = await getAccounts();
+      if (response.success) {
+        const userAccounts = response.data as Account[];
+        setAccounts(userAccounts);
+        setFilteredAccounts(userAccounts);
+        const totalBalance = userAccounts.reduce(
+          (acc, curr) => acc + curr.balance,
+          0
+        );
+        setBalance(totalBalance);
+        if (userAccounts.length > 0) {
+          const uniqueTypes = Array.from(
+            new Set(userAccounts.map((acc) => acc.type))
+          ).map((type) => ({
+            value: type,
+            label: `${type} Account`,
+          }));
+          setAccountTypes([
+            { value: "*", label: "All Accounts" },
+            ...uniqueTypes,
+          ]);
+        }
+      } else {
+        showToast(response.message, "error");
+      }
+    } catch {
+      showToast("An error Ocured", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
     let filtered =
@@ -74,7 +89,7 @@ const AccountSummaryPage: React.FC = () => {
           new Date(a.lastTransactionDate).getTime()
       );
     }
-    setSelectedAccounts(undefined)
+    setSelectedAccounts(undefined);
     setFilteredAccounts(filtered);
   }, [accounts, selectedType, selectedSort]);
 
@@ -122,9 +137,7 @@ const AccountSummaryPage: React.FC = () => {
           />
 
           {selectedAccounts && (
-            <AccountTransactions
-              selectedAccounts={selectedAccounts}
-            />
+            <AccountTransactions selectedAccounts={selectedAccounts} />
           )}
         </div>
       )}

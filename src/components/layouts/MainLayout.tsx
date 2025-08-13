@@ -2,10 +2,19 @@ import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layouts/Navbar";
 import { useAppSelector } from "@/store/store";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { useAuth } from "@/hooks/useAuth";
 
 const MainLayout: React.FC = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+  const { logoutUser } = useAuth();
+
+  useSessionTimeout({
+    timeoutMinutes: 5,
+    warningMinutes: 3,
+    onTimeout: logoutUser,
+  });
 
   if (!isAuthenticated) {
     navigate("/login");

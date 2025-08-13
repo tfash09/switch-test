@@ -5,7 +5,7 @@ export interface Account {
   balance: number;
   currency: string;
   lastTransactionDate: string;
-  isActive?: boolean; 
+  isActive?: boolean;
 }
 
 export type Transaction = {
@@ -26,15 +26,15 @@ export interface AccountCardProps {
 }
 
 export type Option = {
-    value: string;
-    label: string;
+  value: string;
+  label: string;
 };
 
 export type SelectProps = {
-    options: Option[];
-    value: string;
-    onChange: (value: string) => void;
-    label?: string;
+  options: Option[];
+  value: string;
+  onChange: (value: string) => void;
+  label?: string;
 };
 
 export interface LoginDetails {
@@ -50,4 +50,27 @@ export interface AccountCarouselProps {
 
 export interface AccountTransactionsProps {
   selectedAccounts: Account;
+}
+
+export interface UseSessionTimeoutOptions {
+  timeoutMinutes?: number;
+  warningMinutes?: number;
+  onTimeout: () => void;
+}
+
+export interface User {
+  id: number | null;
+  email: string | null;
+  name: string | null;
+  firstName: string | null;
+  middleName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User;
+  loading: boolean;
+  error: string | null;
 }

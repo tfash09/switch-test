@@ -12,6 +12,7 @@ import { showToast } from "@/lib/toast";
 import { useAppSelector } from "@/store/store";
 import { dummyUser } from "@/data/mockData";
 import type { LoginDetails } from "@/lib/interfaces";
+import { useAuth } from "@/hooks/useAuth";
 
 const LoginPage: React.FC = () => {
   const [loader, setLoader] = useState(false);
@@ -19,6 +20,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { login } = useAuth();
 
   const schema = Yup.object().shape({
     email: Yup.string().required("Email is required"),
@@ -41,17 +43,14 @@ const LoginPage: React.FC = () => {
     try {
       setLoader(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await login(data.email, data.password);
 
-      if (
-        data.email === "test@interswitch.com" &&
-        data.password === "Pass@123"
-      ) {
-        showToast("Login Successful", "success");
+      if (response.success) {
+        showToast(response.message, "success");
         dispatch(loginSuccess(dummyUser));
+        navigate("/account-summary");
       } else {
-        showToast("Login credentials failed", "error");
-        return;
+        showToast(response.message, "error");
       }
     } catch {
       dispatch(loginFailure("Login failed"));

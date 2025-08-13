@@ -4,30 +4,59 @@ import TextBox from "./TextBox";
 import { formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 import React from "react";
-import { mockTransactions } from "@/data/mockData";
+import { showToast } from "@/lib/toast";
+import { useAccount } from "@/hooks/useAccount";
+import Button from "./Button";
+import { Download } from "lucide-react";
 
 const AccountTransactions: React.FC<AccountTransactionsProps> = ({
-    selectedAccounts
+  selectedAccounts,
 }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [minAmount, setMinAmount] = useState("");
   const [typeFilter, setTypeFilter] = useState("*");
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [paginatedTransactions, setPaginatedTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filteredTransactions, setFilteredTransactions] = useState<
+    Transaction[]
+  >([]);
+  const [paginatedTransactions, setPaginatedTransactions] = useState<
+    Transaction[]
+  >([]);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 5;
-
+  const { getTransactionsByAccountId } = useAccount();
 
   React.useEffect(() => {
-    if (!selectedAccounts) {
-      setFilteredTransactions([]);
-      setPaginatedTransactions([]);
-      setTotalPages(1);
-      return;
+    async function fetchTransactions() {
+      if (!selectedAccounts) {
+        setFilteredTransactions([]);
+        setPaginatedTransactions([]);
+        setTotalPages(1);
+        return;
+      }
+      setLoading(true);
+      try {
+        const response = await getTransactionsByAccountId(selectedAccounts.id);
+        if (response.success) {
+          const accountTransactions = response.data as Transaction[];
+          setTransactions(accountTransactions);
+        } else {
+          showToast(response.message, "error");
+        }
+      } catch {
+        showToast("An error Ocured", "error");
+      } finally {
+        setLoading(false);
+      }
     }
-    let txns = mockTransactions[selectedAccounts.id] || [];
+    fetchTransactions();
+  }, [selectedAccounts]);
+
+  React.useEffect(() => {
+    let txns = transactions;
     if (typeFilter !== "*") {
       txns = txns.filter((txn) => txn.type === typeFilter);
     }
@@ -42,14 +71,38 @@ const AccountTransactions: React.FC<AccountTransactionsProps> = ({
     }
     setFilteredTransactions(txns);
     setTotalPages(Math.max(1, Math.ceil(txns.length / pageSize)));
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [selectedAccounts, typeFilter, startDate, endDate, minAmount]);
+    setCurrentPage(1);
+  }, [typeFilter, startDate, endDate, minAmount, transactions]);
 
   React.useEffect(() => {
     const startIdx = (currentPage - 1) * pageSize;
-    setPaginatedTransactions(filteredTransactions.slice(startIdx, startIdx + pageSize));
+    setPaginatedTransactions(
+      filteredTransactions.slice(startIdx, startIdx + pageSize)
+    );
   }, [filteredTransactions, currentPage, pageSize]);
 
+  const exportToCSV = () => {
+    const csvContent = [
+      ["Date", "Description", "Type", "Amount", "Balance"],
+      ...filteredTransactions.map((t) => [
+        new Date(t.date).toLocaleDateString(),
+        t.description,
+        t.type,
+        t.amount.toString(),
+        t.balance.toString(),
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transactions-${selectedAccounts.id}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="mt-10">
@@ -58,6 +111,12 @@ const AccountTransactions: React.FC<AccountTransactionsProps> = ({
           <h2 className="text-2xl font-bold text-primary mb-1">
             {selectedAccounts.type} Account ({selectedAccounts.accountNumber})
           </h2>
+          {filteredTransactions.length > 0 && (
+            <Button onClick={exportToCSV} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
@@ -104,7 +163,27 @@ const AccountTransactions: React.FC<AccountTransactionsProps> = ({
             </tr>
           </thead>
           <tbody>
-            {paginatedTransactions.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="px-4 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-40"></div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                </tr>
+              ))
+            ) : paginatedTransactions.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
                   No transactions found.

@@ -4,17 +4,14 @@ import { store } from "./store/store";
 import AppRoutes from "./routes";
 import { Provider } from "react-redux";
 import { ToastContainer } from "react-toastify";
-import { AuthProvider } from "./auth/AuthContext";
 
 function App() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-          <ToastContainer limit={2} />
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+        <ToastContainer limit={2} />
+      </BrowserRouter>
     </Provider>
   );
 }

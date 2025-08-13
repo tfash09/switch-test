@@ -1,0 +1,98 @@
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import LogoImage from "@/assets/images/interswitch_logo.svg";
+import { FadeIn } from "../custom/Animation";
+import { useAppSelector } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { logout } from "@/store/features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { showToast } from "@/lib/toast";
+
+const avatar = "https://i.pravatar.cc/40?img=3";
+
+const navLinks = [
+  { name: "Accounts", path: "/account-summary" },
+  { name: "Transfer", path: "/transfer" },
+];
+
+const Navbar: React.FC = () => {
+  const { user } = useAppSelector((state) => state.auth);
+  const location = useLocation();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setDropdownOpen(false);
+    dispatch(logout());
+    navigate("/login");
+    showToast("Logged out!");
+  };
+
+  return (
+    <nav className="bg-[#f1f5f8] text-primary px-8 h-16 flex items-center justify-between shadow-md border-b">
+      {/* Logo */}
+      <div className="font-bold text-2xl tracking-wide">
+        <FadeIn direction="down" delay={0.6}>
+          <img src={`${LogoImage}`} className="relative z-10 w-48 m-auto" />
+        </FadeIn>
+      </div>
+
+      {/* Navigation Links */}
+      <div className="flex gap-8 items-center">
+        {navLinks.map((link) => {
+          const isActive = location.pathname.startsWith(link.path);
+          return (
+            <Link
+              key={link.name}
+              to={link.path}
+              className={`transition-colors pb-1 font-medium border-b-2 ${
+                isActive
+                  ? "text-green-400 border-green-400 font-semibold"
+                  : "border-transparent"
+              }`}
+            >
+              {link.name}
+            </Link>
+          );
+        })}
+
+        {/* User Avatar & Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen((open) => !open)}
+            className="flex items-center cursor-pointer focus:outline-none bg-transparent border-none p-0"
+          >
+            <img
+              src={avatar}
+              alt="avatar"
+              className="w-10 h-10 rounded-full mr-3 border-2 border-green-400"
+            />
+            <span className="font-medium">{user.lastName}</span>
+            <svg
+              className="ml-2"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M7 10l5 5 5-5z" />
+            </svg>
+          </button>
+          {dropdownOpen && (
+            <div className="absolute right-0 top-[calc(100%+0.5rem)] bg-white text-green-800 min-w-[160px] shadow-lg rounded-lg z-10 py-2">
+              <button
+                className="w-full bg-transparent border-none text-green-800 px-6 py-3 text-left cursor-pointer font-medium text-base rounded-lg transition-colors hover:bg-green-50"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

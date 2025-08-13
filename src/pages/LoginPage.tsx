@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
   });
 
   if (isAuthenticated) {
-    navigate("/dashboard");
+    navigate("/account-summary");
   }
 
   const {

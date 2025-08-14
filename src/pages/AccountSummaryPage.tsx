@@ -48,7 +48,7 @@ const AccountSummaryPage: React.FC = () => {
         setAccounts(userAccounts);
         setFilteredAccounts(userAccounts);
         const totalBalance = userAccounts.reduce(
-          (acc, curr) => acc + curr.balance,
+          (acc, curr) => (curr.type !== "Loan" ? acc + curr.balance : acc),
           0
         );
         setBalance(totalBalance);

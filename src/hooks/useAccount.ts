@@ -1,4 +1,6 @@
 import { transactions } from "@/data/mockData";
+import type { transactionFormData } from "@/lib/formData";
+import type { Transaction } from "@/lib/interfaces";
 
 export const useAccount = () => {
   const getAccounts = async () => {
@@ -79,9 +81,38 @@ export const useAccount = () => {
     };
   };
 
+  const addTransaction = async (transaction: transactionFormData) => {
+    const accTrans = await getTransactionsByAccountId(transaction.accountId);
+    if (!accTrans.success || accTrans.data?.length === 0) {
+      return {
+        success: false,
+        message: "Account not found",
+      };
+    }
+    const lastBalance = accTrans.data[accTrans.data.length - 1]?.balance || 0;
+    const data: Transaction = {
+      id: `txn_${Math.random().toString(36).substring(2, 15)}`,
+      date: new Date().toISOString(),
+      description: transaction.description || "No description",
+      type: "debit",
+      amount: Number(transaction.amount),
+      balance: lastBalance - transaction.amount,
+      category: transaction.category || "Uncategorized",
+    };
+    accTrans.data.push(data);
+    transactions[transaction.accountId as keyof typeof transactions] =
+      accTrans.data;
+
+    return {
+      success: true,
+      message: "Transaction added successfully",
+    };
+  };
+
   return {
     getAccounts,
     getAllTransactions,
     getTransactionsByAccountId,
+    addTransaction,
   };
 };

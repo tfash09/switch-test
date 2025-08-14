@@ -1,7 +1,7 @@
 import type { AccountTransactionsProps, Transaction } from "@/lib/interfaces";
 import { Select } from "./Select";
 import TextBox from "./TextBox";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, mask } from "@/lib/utils";
 import { useState } from "react";
 import React from "react";
 import { showToast } from "@/lib/toast";
@@ -109,7 +109,8 @@ const AccountTransactions: React.FC<AccountTransactionsProps> = ({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-primary mb-1">
-            {selectedAccounts.type} Account ({selectedAccounts.accountNumber})
+            {selectedAccounts.type} Account (
+            {mask(selectedAccounts.accountNumber)})
           </h2>
           {filteredTransactions.length > 0 && (
             <Button onClick={exportToCSV} variant="outline" size="sm">

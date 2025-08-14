@@ -5,9 +5,7 @@ import {
   CreditCardIcon,
 } from "@heroicons/react/24/outline";
 import type { Account } from "@/lib/interfaces";
-import { formatCurrency } from "@/lib/utils";
-
-const mask = (str: string) => str.replace(/.(?=.{4})/g, "*");
+import { formatCurrency, mask } from "@/lib/utils";
 
 const AccountCard: React.FC<Account> = ({
   type,

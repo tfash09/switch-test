@@ -1,4 +1,4 @@
-import { transactions } from "@/data/mockData";
+import { mockAccounts, transactions } from "@/data/mockData";
 import type { transactionFormData } from "@/lib/formData";
 import type { Transaction } from "@/lib/interfaces";
 
@@ -8,56 +8,7 @@ export const useAccount = () => {
     return {
       success: true,
       message: "Login successful",
-      data: [
-        {
-          id: "acc_001",
-          type: "Savings",
-          accountNumber: "1234567890123456",
-          balance: 25750.5,
-          currency: "NGN",
-          lastTransactionDate: "2024-01-15",
-        },
-        {
-          id: "acc_002",
-          type: "Current",
-          accountNumber: "2345678901234567",
-          balance: 8932.25,
-          currency: "NGN",
-          lastTransactionDate: "2024-01-16",
-        },
-        {
-          id: "acc_003",
-          type: "Loan",
-          accountNumber: "3456789012345678",
-          balance: 1500.0,
-          currency: "NGN",
-          lastTransactionDate: "2024-02-01",
-        },
-        {
-          id: "acc_004",
-          type: "Savings",
-          accountNumber: "4567890123456789",
-          balance: 102340.75,
-          currency: "NGN",
-          lastTransactionDate: "2024-02-10",
-        },
-        {
-          id: "acc_005",
-          type: "Current",
-          accountNumber: "5678901234567890",
-          balance: 500000.0,
-          currency: "NGN",
-          lastTransactionDate: "2024-03-05",
-        },
-        {
-          id: "acc_006",
-          type: "Savings",
-          accountNumber: "6789012345678901",
-          balance: 75000.25,
-          currency: "NGN",
-          lastTransactionDate: "2024-03-15",
-        },
-      ],
+      data: mockAccounts,
     };
   };
 
@@ -74,6 +25,9 @@ export const useAccount = () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const accountTransactions =
       transactions[accountId as keyof typeof transactions] || [];
+    accountTransactions.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
     return {
       success: true,
       message: "Login successful",
@@ -89,10 +43,10 @@ export const useAccount = () => {
         message: "Account not found",
       };
     }
-    const lastBalance = accTrans.data[accTrans.data.length - 1]?.balance || 0;
+    const lastBalance = accTrans.data[0]?.balance || 0;
     const data: Transaction = {
       id: `txn_${Math.random().toString(36).substring(2, 15)}`,
-      date: new Date().toISOString(),
+      date: new Date().toISOString().split("T")[0],
       description: transaction.description || "No description",
       type: "debit",
       amount: Number(transaction.amount),
@@ -102,6 +56,14 @@ export const useAccount = () => {
     accTrans.data.push(data);
     transactions[transaction.accountId as keyof typeof transactions] =
       accTrans.data;
+
+    //Update the account balance
+    const accountIndex = mockAccounts.findIndex(
+      (acc) => acc.id === transaction.accountId
+    );
+    if (accountIndex !== -1) {
+      mockAccounts[accountIndex].balance -= transaction.amount;
+    }
 
     return {
       success: true,

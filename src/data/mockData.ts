@@ -1,14 +1,4 @@
-import type { Account, Transaction } from "@/lib/interfaces";
-import { generateTransactions } from "@/lib/utils";
-
-export const accountIds = [
-  "acc_001",
-  "acc_002",
-  "acc_003",
-  "acc_004",
-  "acc_005",
-  "acc_006",
-];
+import type { Account } from "@/lib/interfaces";
 
 export const dummyUser = {
   id: 1,
@@ -20,32 +10,12 @@ export const dummyUser = {
   lastName: "Example",
 };
 
-export const categories = {
-  credit: [
-    "Salary",
-    "Transfer In",
-    "Refund",
-    "Investment Return",
-    "Interest Credit",
-    "Gift",
-  ],
-  debit: [
-    "Grocery",
-    "Restaurant",
-    "Online Purchase",
-    "Transfer Out",
-    "Bill Payment",
-    "Cash Withdrawal",
-    "Transportation",
-  ],
-};
-
 export const mockAccounts: Account[] = [
   {
     id: "acc_001",
     type: "Savings",
     accountNumber: "1234567890123456",
-    balance: 25750.5,
+    balance: 10439.22,
     currency: "NGN",
     lastTransactionDate: "2024-01-15",
   },
@@ -53,7 +23,7 @@ export const mockAccounts: Account[] = [
     id: "acc_002",
     type: "Current",
     accountNumber: "2345678901234567",
-    balance: 8932.25,
+    balance: 42916.21,
     currency: "NGN",
     lastTransactionDate: "2024-01-16",
   },
@@ -61,7 +31,7 @@ export const mockAccounts: Account[] = [
     id: "acc_003",
     type: "Loan",
     accountNumber: "3456789012345678",
-    balance: 1500.0,
+    balance: 75569.93,
     currency: "NGN",
     lastTransactionDate: "2024-02-01",
   },
@@ -69,7 +39,7 @@ export const mockAccounts: Account[] = [
     id: "acc_004",
     type: "Savings",
     accountNumber: "4567890123456789",
-    balance: 102340.75,
+    balance: 82916.35,
     currency: "NGN",
     lastTransactionDate: "2024-02-10",
   },
@@ -77,7 +47,7 @@ export const mockAccounts: Account[] = [
     id: "acc_005",
     type: "Current",
     accountNumber: "5678901234567890",
-    balance: 500000.0,
+    balance: 48163.8,
     currency: "NGN",
     lastTransactionDate: "2024-03-05",
   },
@@ -85,18 +55,11 @@ export const mockAccounts: Account[] = [
     id: "acc_006",
     type: "Savings",
     accountNumber: "6789012345678901",
-    balance: 75000.25,
+    balance: 82820.74,
     currency: "NGN",
     lastTransactionDate: "2024-03-15",
   },
 ];
-
-export const getMockTransactions = (): Record<string, Transaction[]> => {
-  return accountIds.reduce((acc, id) => {
-    acc[id] = generateTransactions(id, 20);
-    return acc;
-  }, {} as Record<string, Transaction[]>);
-};
 
 export const transactions = {
   acc_001: [

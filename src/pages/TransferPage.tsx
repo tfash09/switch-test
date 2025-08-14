@@ -6,7 +6,7 @@ import { useAccount } from "@/hooks/useAccount";
 import type { transactionFormData } from "@/lib/formData";
 import type { Account, Option } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, mask } from "@/lib/utils";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -37,7 +37,7 @@ const TransferPage: React.FC = () => {
           .filter((acc) => acc.type !== "Loan")
           .map((acc) => ({
             value: acc.id,
-            label: `${acc.type} - ${acc.accountNumber} - ${formatCurrency(
+            label: `${acc.type} - ${mask(acc.accountNumber)} - ${formatCurrency(
               acc.balance
             )}`,
           }));
@@ -208,6 +208,13 @@ const TransferPage: React.FC = () => {
           </p>
           <p>
             <strong>Amount:</strong> {formatCurrency(formData.amount)}
+          </p>
+          <p>
+            <strong>Balance Remaining:</strong>{" "}
+            {formatCurrency(
+              (rawAccounts.find((acc) => acc.id === formData.accountId)
+                ?.balance || 0) - formData.amount
+            )}
           </p>
           <p>
             <strong>Description:</strong> {formData.description}
